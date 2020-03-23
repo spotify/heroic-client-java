@@ -15,7 +15,7 @@ There are three main components of a Heroic query.
 1. aggregations on how to combine and group time series.
 
 
-Let's build a query that will return the requests per second for each endpoint for the artist microservice and group by the site (datacenter). 
+Let's build a query that will return the requests per second for each endpoint for the artist microservice and group by the region. 
 
 What we will do is...
 
@@ -31,29 +31,29 @@ final MetricRequest request = new MetricRequest.Builder()
     .withRange(Relative.withTime(TimeUnit.HOURS, 1L))
     .withFilter(KeyTagFilter.of(Key.of("apollo"),
         List.of(
-            Tag.of("what", "endpoint-request-rate", Operator.MATCH))),
-            Tag.of("stat", "1m", Operator.MATCH))),
+            Tag.of("what", "endpoint-request-rate", Operator.MATCH),
+            Tag.of("stat", "1m", Operator.MATCH),
             Tag.of("application", "artist", Operator.MATCH))))
     .withAggregation(
         GroupingAggregation.forEach(new Average(Sampling.withTime(TimeUnit.SECONDS, 60))))
     .withAggregation(
-        GroupingAggregation.groupBy(List.of("site"), new Sum(Sampling.withTime(TimeUnit.SECONDS, 60))))
+        GroupingAggregation.groupBy(List.of("region"), new Sum(Sampling.withTime(TimeUnit.SECONDS, 60))))
     .build();
 
 
 // blocking call
-final MetricResponse response = heroicClient.queryMetricsBlocking(request);
+final MetricResponse response = client.queryMetricsBlocking(request);
 
 for (final ResultGroup.Points series : response.getPoints()) {
     System.out.println(series.getTags());
     for (final DataPoint point : series.getValues()) {
-        System.out.println(point.getTimestamp() + ":" +point.getValue());
+        System.out.println(point.getTimestamp() + ":" + point.getValue());
     }
 }
 
 
 // or make an async call
-final CompletableFuture<MetricResponse> response = heroicClient.queryMetrics(request);
+final CompletableFuture<MetricResponse> response = client.queryMetrics(request);
 
 
 ```
