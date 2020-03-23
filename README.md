@@ -25,7 +25,7 @@ What we will do is...
 
 
 ```
-final HeroicClient client = new HeroicClient("http://heroic");
+final HeroicClient client = HeroicClient.create("http://heroic");
 
 final MetricRequest request = new MetricRequest.Builder()
     .withRange(Relative.withTime(TimeUnit.HOURS, 1L))
@@ -71,7 +71,7 @@ final Config config = new Config.Builder()
     .setReadTimeoutSeconds(60) // default 300s
     .build();
 
-final HeroicClient client = new HeroicClient("http://heroic", config);
+final HeroicClient client = HeroicClient.createWithConfig("http://heroic", config);
 
 ```
 

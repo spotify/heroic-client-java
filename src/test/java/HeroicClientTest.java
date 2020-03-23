@@ -21,7 +21,6 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.spotify.heroic.client.Config;
 import com.spotify.heroic.client.HeroicClient;
 import com.spotify.heroic.client.api.HeroicClientException;
 import com.spotify.heroic.client.api.query.BatchRequest;
@@ -69,15 +68,7 @@ public class HeroicClientTest {
     server.enqueue(new MockResponse().setResponseCode(200).setBody(new String(
         getClass().getResourceAsStream("/heroic-metrics-response.json").readAllBytes())));
 
-    final Config config = new Config.Builder()
-        .setClientId("quota-watcher")
-        .setConnectTimeoutSeconds(30)
-        .setReadTimeoutSeconds(60)
-        .build();
-
-    final HeroicClient client = new HeroicClient("http://heroic", config);
-
-    final HeroicClient heroicClient = new HeroicClient(server.url("").toString());
+    final HeroicClient heroicClient = HeroicClient.create(server.url("").toString());
     final MetricResponse metricResponse = heroicClient.queryMetricsBlocking(METRIC_REQUEST);
 
     assertEquals(3, metricResponse.getCommonTags().size());
@@ -93,7 +84,7 @@ public class HeroicClientTest {
     server.enqueue(new MockResponse().setResponseCode(200).setBody(new String(
         getClass().getResourceAsStream("/heroic-batch-response.json").readAllBytes())));
 
-    final HeroicClient heroicClient = new HeroicClient(server.url("").toString());
+    final HeroicClient heroicClient = HeroicClient.create(server.url("").toString());
 
     final BatchRequest batchRequest =
         new BatchRequest.Builder().withQuery("A", METRIC_REQUEST).build();
@@ -112,7 +103,7 @@ public class HeroicClientTest {
   @Test
   void heroicServerErrorResponse() {
     server.enqueue(new MockResponse().setResponseCode(500));
-    final HeroicClient heroicClient = new HeroicClient(server.url("").toString());
+    final HeroicClient heroicClient = HeroicClient.create(server.url("").toString());
     assertThrows(
         HeroicClientException.class, () -> heroicClient.queryMetricsBlocking(METRIC_REQUEST));
   }

@@ -136,7 +136,6 @@
                 </executions>
                 <configuration>
                     <jvmTarget>11</jvmTarget>
-                    <languageVersion>11</languageVersion>
                 </configuration>
             </plugin>
 

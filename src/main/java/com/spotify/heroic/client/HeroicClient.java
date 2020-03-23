@@ -45,19 +45,15 @@ import okhttp3.ResponseBody;
 
 public class HeroicClient {
 
-  private HttpUrl baseUrl;
-  private OkHttpClient client;
-  private Request baseRequest;
+  private final HttpUrl baseUrl;
+  private final OkHttpClient client;
+  private final Request baseRequest;
 
   private static final ObjectMapper mapper = new ObjectMapper()
       .registerModule(new KotlinModule())
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-  public HeroicClient(String heroicUrl) {
-    new HeroicClient(heroicUrl, new Config());
-  }
-
-  public HeroicClient(String heroicUrl, Config config) {
+  private HeroicClient(String heroicUrl, Config config) {
     this.baseUrl = HttpUrl.parse(heroicUrl);
     if (this.baseUrl == null) {
       throw new HeroicClientException("A valid heroic url is required");
@@ -73,6 +69,14 @@ public class HeroicClient {
         .addHeader("Content-Type", "application/json")
         .addHeader("X-Client-Id", config.getClientId())
         .build();
+  }
+
+  public static HeroicClient create(String heroicUrl) {
+    return new HeroicClient(heroicUrl, new Config.Builder().build());
+  }
+
+  public static HeroicClient createWithConfig(String heroicUrl, Config config) {
+    return new HeroicClient(heroicUrl, config);
   }
 
 
