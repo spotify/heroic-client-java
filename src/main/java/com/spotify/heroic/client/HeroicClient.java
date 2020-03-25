@@ -79,7 +79,6 @@ public class HeroicClient {
     return new HeroicClient(heroicUrl, config);
   }
 
-
   private <T> Request postRequest(String pathSegments, T request) throws HeroicClientException {
     try {
       return baseRequest.newBuilder()

@@ -1,6 +1,6 @@
 # heroic-client-java
 
-> a java client for the heroic tsdb
+> a java client for the heroic TSDB
 
 The client supports synchronous and asynchronous paradigms and uses okhttp to make the http requests.
 
@@ -44,7 +44,7 @@ final MetricRequest request = new MetricRequest.Builder()
 // blocking call
 final MetricResponse response = client.queryMetricsBlocking(request);
 
-for (final ResultGroup.Points series : response.getPoints()) {
+for (final ResultGroup.Points series : response.getDataPoints()) {
     System.out.println(series.getTags());
     for (final DataPoint point : series.getValues()) {
         System.out.println(point.getTimestamp() + ":" + point.getValue());

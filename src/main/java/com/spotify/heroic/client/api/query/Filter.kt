@@ -77,23 +77,16 @@ class Tag(operator: Operator, key: String, value: String?) {
 }
 
 
-//TODO: add tag in, tag not in, and regex
 enum class Operator {
     @JsonProperty("=")
     MATCH,
 
-    @JsonProperty("!=")
-    NOT_MATCH,
-
     @JsonProperty("+")
     EXIST,
-
-    @JsonProperty("!+")
-    NOT_EXIST,
 
     @JsonProperty("^")
     PREFIX,
 
-    @JsonProperty("!^")
-    NOT_PREFIX
+    @JsonProperty("q")
+    CUSTOM
 }

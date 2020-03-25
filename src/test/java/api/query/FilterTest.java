@@ -92,4 +92,10 @@ public class FilterTest {
         mapper.writeValueAsString(Tag.not(Operator.MATCH, "what", "heartbeat")));
   }
 
+  @Test
+  public void testCustomTag() throws JsonProcessingException {
+    assertEquals(
+        "[\"q\",\"role in [heroicsuggestes\"]",
+        mapper.writeValueAsString(Tag.and(Operator.CUSTOM, "role in [heroicsuggestes")));
+  }
 }
