@@ -8,6 +8,21 @@ Status: **experimental** api is subject to change!
 
 ## Quick start
 
+
+### Installation
+
+Get the latest version from the release page.
+```xml
+<dependency>
+  <groupId>com.spotify.heroic</groupId>
+  <artifactId>heroic-client</artifactId>
+  <version>${heroic-client.version}</version>
+</dependency>
+```
+
+
+### Building a Query
+
 There are three main components of a Heroic query.
 
 1. time range.
