@@ -40,7 +40,7 @@ data class MetricResponse(
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun getPoints(): List<ResultGroup.Points> {
+    fun getDataPoints(): List<ResultGroup.Points> {
         return result as List<ResultGroup.Points>
     }
 

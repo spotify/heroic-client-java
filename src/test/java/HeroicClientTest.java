@@ -72,8 +72,8 @@ public class HeroicClientTest {
     final MetricResponse metricResponse = heroicClient.queryMetricsBlocking(METRIC_REQUEST);
 
     assertEquals(3, metricResponse.getCommonTags().size());
-    assertEquals(3, metricResponse.getPoints().size());
-    assertEquals(123.0, metricResponse.getPoints().get(0).getValues().get(0).getValue());
+    assertEquals(3, metricResponse.getDataPoints().size());
+    assertEquals(123.0, metricResponse.getDataPoints().get(0).getValues().get(0).getValue());
 
     RecordedRequest serverRequest = server.takeRequest();
     assertEquals("/query/metrics", serverRequest.getPath());
@@ -92,8 +92,8 @@ public class HeroicClientTest {
     final BatchResponse batchResponse = heroicClient.queryBatchBlocking(batchRequest);
 
     assertEquals(3, batchResponse.getResults().get("A").getCommonTags().size());
-    assertEquals(3, batchResponse.getResults().get("A").getPoints().size());
-    assertEquals(123.0, batchResponse.getResults().get("A").getPoints()
+    assertEquals(3, batchResponse.getResults().get("A").getDataPoints().size());
+    assertEquals(123.0, batchResponse.getResults().get("A").getDataPoints()
         .get(0).getValues().get(0).getValue());
 
     RecordedRequest serverRequest = server.takeRequest();
