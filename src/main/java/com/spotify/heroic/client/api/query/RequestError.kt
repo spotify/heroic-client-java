@@ -38,13 +38,13 @@ interface RequestError {
         @JsonProperty("internal") val internal: Boolean) : RequestError
 
     @JsonTypeName("shard")
-    class ShardError (
+    data class ShardError (
         @JsonProperty("nodes") val nodes: List<String>,
         @JsonProperty("shard") val shard: Map<String, String>,
         @JsonProperty("error") val error: String) : RequestError
 
     @JsonTypeName("query")
-    class QueryError(
-        @JsonProperty("error") error: String
+    data class QueryError(
+        @JsonProperty("error") val error: String
     ) : RequestError
 }

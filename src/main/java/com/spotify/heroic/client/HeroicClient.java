@@ -98,7 +98,8 @@ public class HeroicClient {
     return bind(request).thenApply(r -> marshallResponse(r, new TypeReference<>() {}));
   }
 
-  public MetricResponse queryMetricsBlocking(MetricRequest metricRequest) throws HeroicClientException {
+  public MetricResponse queryMetricsBlocking(MetricRequest metricRequest)
+      throws HeroicClientException {
     final Request request = postRequest("query/metrics", metricRequest);
     return marshallResponse(blockingRequest(request), new TypeReference<>() {});
   }
