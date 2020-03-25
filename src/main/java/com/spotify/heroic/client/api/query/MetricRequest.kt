@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 data class MetricRequest(
     val range: DateRange,
     val filter: Filter,
-    val aggregators: MutableList<GroupingAggregation>,
+    val aggregators: MutableList<Aggregation>,
     val features: MutableList<String>,
     val clientContext: MutableMap<String, String>
 ) {
@@ -38,7 +38,7 @@ data class MetricRequest(
     class Builder {
         var filter: Filter = TrueFilter()
         var range: DateRange = DateRange.Relative(TimeUnit.HOURS, 1L)
-        var aggregation: MutableList<GroupingAggregation> = ArrayList()
+        var aggregation: MutableList<Aggregation> = ArrayList()
         var features: MutableList<String> = ArrayList()
         var clientContext: MutableMap<String, String> = HashMap()
 
@@ -47,18 +47,19 @@ data class MetricRequest(
             return this
         }
 
+
         fun withRange(range: DateRange): Builder {
             this.range = range
             return this
         }
 
-        fun withAggregation(aggregation: GroupingAggregation): Builder {
+        fun withAggregation(aggregation: Aggregation): Builder {
             this.aggregation.add(aggregation)
             return this
         }
 
-        fun withAggregations(aggregations: List<GroupingAggregation>): Builder {
-            aggregation!!.addAll(aggregations)
+        fun withAggregations(aggregations: List<Aggregation>): Builder {
+            aggregation.addAll(aggregations)
             return this
         }
 
