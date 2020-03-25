@@ -6,45 +6,38 @@ import com.fasterxml.jackson.annotation.JsonValue
 
 interface Filter
 
-class KeyTagFilter(key : Key, tags: List<Tag>) : Filter {
-    @JsonValue
-    private var filter = mutableListOf<Any>()
-
-    init {
-        filter.add("and")
-        filter.add(key)
-        filter.addAll(tags)
-    }
-    companion object {
-        @JvmStatic
-        fun of(key : Key, tags: List<Tag>) : Filter {
-            return KeyTagFilter(key, tags)
-        }
-    }
-}
-
-class TagFilter(tags: List<Tag>): Filter {
-    @JsonValue
-    private var filter = mutableListOf<Any>()
-
-    init {
-        filter.add("and")
-        filter.addAll(tags)
-    }
-    companion object {
-        @JvmStatic
-        fun of(tags: List<Tag>) : Filter {
-            return TagFilter(tags)
-        }
-    }
-}
-
 class TrueFilter: Filter {
     @JsonValue
     private var filter = true
 }
 
-// TODO: Support other operators
+class KeyTagFilter(key : Key?, tags: List<Any>) : Filter {
+    @JsonValue
+    private var filter = mutableListOf<Any>()
+
+    init {
+        filter.add("and")
+        key?.let { filter.add(it) }
+        filter.addAll(tags)
+    }
+    companion object {
+        @JvmStatic
+        fun of(key : Key?) : Filter {
+            return KeyTagFilter(key, listOf())
+        }
+
+        @JvmStatic
+        fun of(tags: List<Tag>) : Filter {
+            return KeyTagFilter(null, tags)
+        }
+
+        @JvmStatic
+        fun of(key : Key?, tags: List<Any>) : Filter {
+            return KeyTagFilter(key, tags)
+        }
+    }
+}
+
 class Key constructor(key: String) {
     @JsonValue
     private var filter = listOf("key", key)
@@ -57,23 +50,34 @@ class Key constructor(key: String) {
     }
 }
 
-class Tag constructor(key: String, value: String, operator: Operator) {
+class Tag(operator: Operator, key: String, value: String?) {
     @JsonValue
-    private val tag = listOf(operator, key, value)
+    private val tag = listOfNotNull(operator, key, value)
 
     companion object {
         @JvmStatic
-        fun of(key: String, value: String, operator: Operator) : Tag {
-            return Tag(key, value, operator)
+        fun and(operator: Operator, key: String, value: String?) : Tag {
+            return Tag(operator, key, value)
+        }
+
+        @JvmStatic
+        fun and(operator: Operator, key: String) : Tag {
+            return Tag(operator, key, null)
+        }
+
+        @JvmStatic
+        fun not(operator: Operator, key: String, value: String?) : List<Any> {
+            val tag = Tag(operator, key, value)
+            val notTag = mutableListOf<Any>()
+            notTag.add("not")
+            notTag.add(tag.tag)
+            return notTag
         }
     }
 }
 
 
-
-/*
-    TODO: add tag in, tag not in, and regex
- */
+//TODO: add tag in, tag not in, and regex
 enum class Operator {
     @JsonProperty("=")
     MATCH,

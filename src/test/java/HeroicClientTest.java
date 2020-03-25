@@ -51,9 +51,9 @@ public class HeroicClientTest {
   public MockWebServer server = new MockWebServer();
 
   private final Key METRIC_KEY = Key.of("system");
-  private final Tag WHAT_TAG = Tag.of("what", "heartbeat", Operator.MATCH);
+  private final Tag WHAT_TAG = Tag.and(Operator.MATCH, "what", "heartbeat");
 
-  final MetricRequest METRIC_REQUEST = new MetricRequest.Builder()
+  private final MetricRequest METRIC_REQUEST = new MetricRequest.Builder()
       .withRange(Relative.withTime(TimeUnit.HOURS, 1L))
       .withFilter(KeyTagFilter.of(METRIC_KEY, List.of(WHAT_TAG)))
       .withAggregation(
