@@ -20,17 +20,17 @@
 
 package com.spotify.heroic.client.api;
 
-public class HeroicClientException extends RuntimeException {
+public class HeroicServerException extends Exception {
 
-  public HeroicClientException(String message) {
+  public HeroicServerException(String message) {
     super(message);
   }
 
-  public HeroicClientException(String message, Throwable cause) {
+  public HeroicServerException(String message, Throwable cause) {
     super(message, cause);
   }
 
-  public HeroicClientException(Throwable cause) {
+  public HeroicServerException(Throwable cause) {
     super(cause);
   }
 }

@@ -20,9 +20,10 @@
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.spotify.heroic.client.HeroicClient;
-import com.spotify.heroic.client.api.HeroicClientException;
+import com.spotify.heroic.client.api.HeroicServerException;
 import com.spotify.heroic.client.api.query.BatchRequest;
 import com.spotify.heroic.client.api.query.BatchResponse;
 import com.spotify.heroic.client.api.query.DateRange.Relative;
@@ -38,6 +39,7 @@ import com.spotify.heroic.client.api.query.Sum;
 import com.spotify.heroic.client.api.query.Tag;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -64,7 +66,7 @@ public class HeroicClientTest {
 
 
   @Test
-  void queryMetricsResponse() throws IOException, InterruptedException {
+  void queryMetricsResponseBlocking() throws IOException, InterruptedException, HeroicServerException {
     server.enqueue(new MockResponse().setResponseCode(200).setBody(new String(
         getClass().getResourceAsStream("/heroic-metrics-response.json").readAllBytes())));
 
@@ -80,7 +82,7 @@ public class HeroicClientTest {
   }
 
   @Test
-  void queryBatchResponse() throws IOException, InterruptedException {
+  void queryBatchResponseBlocking() throws IOException, InterruptedException, HeroicServerException {
     server.enqueue(new MockResponse().setResponseCode(200).setBody(new String(
         getClass().getResourceAsStream("/heroic-batch-response.json").readAllBytes())));
 
@@ -101,11 +103,21 @@ public class HeroicClientTest {
   }
 
   @Test
-  void heroicServerErrorResponse() {
-    server.enqueue(new MockResponse().setResponseCode(500));
+  void heroicServerErrorResponseBlocking() {
+    server.enqueue(new MockResponse().setResponseCode(500).setBody("Bad query"));
     final HeroicClient heroicClient = HeroicClient.create(server.url("").toString());
     assertThrows(
-        HeroicClientException.class, () -> heroicClient.queryMetricsBlocking(METRIC_REQUEST));
+        HeroicServerException.class, () -> heroicClient.queryMetricsBlocking(METRIC_REQUEST));
+  }
+
+  @Test
+  void heroicServerErrorResponse() throws InterruptedException {
+    server.enqueue(new MockResponse().setResponseCode(500).setBody("Bad query"));
+    final HeroicClient heroicClient = HeroicClient.create(server.url("").toString());
+
+    final CompletableFuture<MetricResponse> response = heroicClient.queryMetrics(METRIC_REQUEST);
+    Thread.sleep(2000L);
+    assertTrue(response.isCompletedExceptionally());
   }
 
 }

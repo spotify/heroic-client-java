@@ -73,11 +73,31 @@ final CompletableFuture<MetricResponse> response = client.queryMetrics(request);
 
 ```
 
+### Check for Heroic errors & limits
+
+A Heroic query can respond with a 200 status code but have internal errors.
+
+It's up to you as the caller on how you want to progress. For example, if Heroic was running clustered across 3 regions and one of the regions was down `response.hasErrors()` would return `true`, is it okay to act on partial data? 
+
+
+```
+# check if response contains errors
+metricResponse.hasErrors();
+    
+# get the actual errors
+metricResponse.getErrors();
+    
+# check if the response hit any quota limits
+metricResponse.hitLimits();
+    
+# get the actual limits hit
+metricResponse.getLimits()
+```
 
 
 ## Config
 
-Setting a clientId is useful when used in conjunction with Heroic's querylogs, allowing you to understand who is responsible for the query volume.
+Setting a clientId is useful when used in conjunction with Heroic's querylogs, allowing operators of Heroic to understand who is responsible for the query volume.
 
 ```
 final Config config = new Config.Builder()

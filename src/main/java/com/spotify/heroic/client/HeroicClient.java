@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import com.spotify.heroic.client.api.HeroicClientException;
+import com.spotify.heroic.client.api.HeroicServerException;
 import com.spotify.heroic.client.api.query.BatchRequest;
 import com.spotify.heroic.client.api.query.BatchResponse;
 import com.spotify.heroic.client.api.query.MetricRequest;
@@ -79,7 +80,7 @@ public class HeroicClient {
     return new HeroicClient(heroicUrl, config);
   }
 
-  private <T> Request postRequest(String pathSegments, T request) throws HeroicClientException {
+  private <T> Request postRequest(String pathSegments, T request) {
     try {
       return baseRequest.newBuilder()
           .url(baseUrl.newBuilder().addPathSegments(pathSegments).build())
@@ -88,7 +89,7 @@ public class HeroicClient {
               mapper.writeValueAsString(request)))
           .build();
     } catch (JsonProcessingException e) {
-      throw new HeroicClientException("Unable to send POST body: " + e.getMessage());
+      throw new HeroicClientException(e);
     }
   }
 
@@ -98,7 +99,7 @@ public class HeroicClient {
   }
 
   public MetricResponse queryMetricsBlocking(MetricRequest metricRequest)
-      throws HeroicClientException {
+      throws HeroicServerException {
     final Request request = postRequest("query/metrics", metricRequest);
     return marshallResponse(blockingRequest(request), new TypeReference<>() {});
   }
@@ -108,45 +109,60 @@ public class HeroicClient {
     return bind(request).thenApply(r -> marshallResponse(r, new TypeReference<>() {}));
   }
 
-  public BatchResponse queryBatchBlocking(BatchRequest batchResponse) {
+  public BatchResponse queryBatchBlocking(BatchRequest batchResponse)
+      throws HeroicServerException {
     final Request request = postRequest("query/batch", batchResponse);
     return marshallResponse(blockingRequest(request), new TypeReference<>() {});
   }
 
   private <T> T marshallResponse(Response r, TypeReference<T> type) {
-    if (!r.isSuccessful()) {
-      throw new HeroicClientException("Response returned status code: " + r.code());
-    }
-
     try (ResponseBody body = r.body()) {
       return mapper.readValue(body.byteStream(), type);
     } catch (IOException e) {
-      throw new HeroicClientException("Response contained invalid JSON: " + e.getMessage());
+      throw new HeroicClientException(e.getMessage());
     }
   }
 
-  private Response blockingRequest(Request request) {
+  private Response blockingRequest(Request request) throws HeroicServerException {
+    final Response response;
     try {
-      return client.newCall(request).execute();
+      response = client.newCall(request).execute();
     } catch (IOException e) {
-      throw new HeroicClientException("Error making request to heroic: " + e.getMessage());
+      throw new HeroicServerException(e.getMessage());
     }
+
+    if (!response.isSuccessful()) {
+      try {
+      throw new HeroicServerException(
+          "status code: " + response.code() + " error: " + response.body().string());
+      } catch (IOException e) {
+        throw new HeroicServerException(e);
+      }
+    }
+    return response;
   }
 
   private CompletableFuture<Response> bind(Request request) {
     final CompletableFuture<Response> future = new CompletableFuture<>();
 
-    client.newCall(request).enqueue(new Callback() {
-      @Override
-      public void onFailure(Call call, IOException e) {
-        future.completeExceptionally(e);
-      }
+    client
+        .newCall(request)
+        .enqueue(
+            new Callback() {
+              @Override
+              public void onFailure(Call call, IOException e) {
+                future.completeExceptionally(e);
+              }
 
-      @Override
-      public void onResponse(Call call, Response response) {
-        future.complete(response);
-      }
-    });
+              @Override
+              public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                  future.complete(response);
+                }
+
+                future.completeExceptionally(new HeroicServerException(response.body().string()));
+              }
+            });
 
     return future;
   }
