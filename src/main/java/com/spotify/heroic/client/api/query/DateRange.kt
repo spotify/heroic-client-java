@@ -51,10 +51,7 @@ interface DateRange {
     fun toReadableDiff(): String
 
     @JsonTypeName("relative")
-    data class Relative(
-        val unit: TimeUnit,
-        val value: Long
-    ) : DateRange {
+    data class Relative(val unit: TimeUnit, val value: Long) : DateRange {
 
         companion object {
             @JvmStatic
@@ -82,10 +79,7 @@ interface DateRange {
     }
 
     @JsonTypeName("absolute")
-    data class Absolute(
-        @JsonProperty("start") val start: Long,
-        @JsonProperty("end") val end: Long
-    ) : DateRange {
+    data class Absolute(val start: Long, val end: Long) : DateRange {
 
         companion object {
             @JvmStatic
