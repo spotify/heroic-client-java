@@ -25,8 +25,7 @@ import java.util.*
 interface ResultGroup {
     @JsonIgnoreProperties(ignoreUnknown = true)
     class Points(
-        val hash: String,
-        val key: String,
+        val key: String?,
         val shard: Map<String, String> = Collections.emptyMap(),
         val tags: Map<String, String>,
         val values: List<DataPoint>,
