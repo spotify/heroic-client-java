@@ -1,7 +1,9 @@
 package com.spotify.heroic.client.api.query
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
@@ -36,6 +38,10 @@ data class Sampling(
             return Sampling(unit, value)
         }
     }
+
+    @JsonCreator
+    constructor(unit: String, value: Long): this(
+        TimeUnit.valueOf(unit.toUpperCase(Locale.ENGLISH)), value)
 }
 
 data class AboveK(val k: Double): Aggregation
