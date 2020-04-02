@@ -61,7 +61,7 @@ public class HeroicClient {
     }
 
     this.client = new OkHttpClient().newBuilder()
-        .callTimeout(config.getConnectTimeoutSeconds(), TimeUnit.SECONDS)
+        .connectTimeout(config.getConnectTimeoutSeconds(), TimeUnit.SECONDS)
         .readTimeout(config.getReadTimeoutSeconds(), TimeUnit.SECONDS)
         .build();
 
