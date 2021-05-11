@@ -1,4 +1,5 @@
 # heroic-client-java
+[![Build Status](https://github.com/spotify/heroic-client-java/workflows/JavaCI/badge.svg)](https://github.com/spotify/heroic-client-java/actions?query=workflow%3AJavaCI)
 
 > a java client for the heroic TSDB
 
