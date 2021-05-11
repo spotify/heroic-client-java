@@ -18,6 +18,8 @@ import java.util.concurrent.TimeUnit
     JsonSubTypes.Type(BottomK::class, name = "bottomk"),
     JsonSubTypes.Type(AboveK::class, name = "abovek"),
     JsonSubTypes.Type(BelowK::class, name = "belowk"),
+    JsonSubTypes.Type(PointsAbove::class, name = "pointsabove"),
+    JsonSubTypes.Type(PointsBelow::class, name = "pointsbelow"),
     JsonSubTypes.Type(Delta::class, name = "delta"),
     JsonSubTypes.Type(DeltaPerSecond::class, name = "deltaPerSecond"),
     JsonSubTypes.Type(RatePerSecond::class, name = "ratePerSecond"),
@@ -51,6 +53,10 @@ data class Average(val sampling: Sampling): Aggregation
 data class BelowK(val k: Double): Aggregation
 
 data class BottomK(val k: Long): Aggregation
+
+data class PointsAbove(val threshold: Double): Aggregation
+
+data class PointsBelow(val threshold: Double): Aggregation
 
 data class Chain(val chain: List<Aggregation>): Aggregation
 
