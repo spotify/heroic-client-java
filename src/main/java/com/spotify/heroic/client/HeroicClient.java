@@ -158,9 +158,9 @@ public class HeroicClient {
               public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                   future.complete(response);
+                } else {
+                  future.completeExceptionally(new HeroicServerException(response.body().string()));
                 }
-
-                future.completeExceptionally(new HeroicServerException(response.body().string()));
               }
             });
 
