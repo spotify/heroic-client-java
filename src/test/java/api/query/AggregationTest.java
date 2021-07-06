@@ -28,6 +28,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import com.spotify.heroic.client.api.query.PointsAbove;
 import com.spotify.heroic.client.api.query.PointsBelow;
+import com.spotify.heroic.client.api.query.Sampling;
+import com.spotify.heroic.client.api.query.TDigest;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
 public class AggregationTest {
@@ -49,5 +52,11 @@ public class AggregationTest {
     assertEquals(
         "{\"type\":\"pointsbelow\",\"threshold\":12.345}",
         mapper.writeValueAsString(new PointsBelow(12.345)));
+  }
+
+  @Test
+  void tDigest() throws JsonProcessingException {
+    assertEquals("{\"type\":\"tdigest\",\"sampling\":{\"unit\":\"SECONDS\",\"value\":60}}",
+        mapper.writeValueAsString(new TDigest(new Sampling(TimeUnit.SECONDS, 60))));
   }
 }

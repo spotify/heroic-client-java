@@ -26,7 +26,8 @@ import java.util.concurrent.TimeUnit
     JsonSubTypes.Type(Count::class, name = "count"),
     JsonSubTypes.Type(NotNegative::class, name = "notNegative"),
     JsonSubTypes.Type(StdDev::class, name = "stddev"),
-    JsonSubTypes.Type(Sum2::class, name = "sum2")
+    JsonSubTypes.Type(Sum2::class, name = "sum2"),
+    JsonSubTypes.Type(TDigest::class, name = "tdigest")
 )
 interface Aggregation
 
@@ -102,5 +103,7 @@ class StdDev: Aggregation
 data class Sum(val sampling: Sampling): Aggregation
 
 data class Sum2(val sampling: Sampling): Aggregation
+
+data class TDigest(val sampling: Sampling): Aggregation
 
 data class TopK(val k: Long): Aggregation
