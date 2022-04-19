@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,11 +26,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
+import com.spotify.heroic.client.api.query.Filter;
 import com.spotify.heroic.client.api.query.Key;
 import com.spotify.heroic.client.api.query.KeyTagFilter;
 import com.spotify.heroic.client.api.query.Operator;
 import com.spotify.heroic.client.api.query.Tag;
 import com.spotify.heroic.client.api.query.TrueFilter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +42,6 @@ public class FilterTest {
   private ObjectMapper mapper =  new ObjectMapper()
       .registerModule(new KotlinModule())
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
 
   @Test
   public void testFilters() throws JsonProcessingException {
@@ -68,6 +70,15 @@ public class FilterTest {
                 List.of(
                     Tag.and(Operator.MATCH, "what", "heartbeat"),
                     Tag.not(Operator.MATCH, "env", "staging")))));
+
+    assertEquals(
+        "[\"and\",[\"key\",\"system\"],[\"=\",\"what\",\"heartbeat\"],[\"=\",\"env\",\"staging\"]]",
+        mapper.writeValueAsString(
+            KeyTagFilter.of(
+                Key.of("system"),
+                List.of(
+                    Tag.and(Operator.MATCH, "what", "heartbeat"),
+                    Tag.and(Operator.MATCH, "env", "staging")))));
   }
 
   @Test
@@ -97,5 +108,14 @@ public class FilterTest {
     assertEquals(
         "[\"q\",\"role in [heroicsuggestes\"]",
         mapper.writeValueAsString(Tag.and(Operator.CUSTOM, "role in [heroicsuggestes")));
+  }
+
+  @Test
+  public void testFilterDeserialization() throws IOException {
+    InputStream stream = getClass().getResourceAsStream("/filter.json");
+    String actualFilter = mapper.readValue(stream, Filter.class).toString();
+//    String actualFilter = mapper.writeValueAsString(stream);
+    assertEquals("[\"and\",[\"key\",\"kube-state-metrics\"],[\"=\",\"what\",\"kube_hpa_status_current_usage\"],[\"=\",\"hpa\",\"alexa-proxy\"]]",
+        actualFilter);
   }
 }
