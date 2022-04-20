@@ -1,0 +1,14 @@
+{
+  "range": {
+    "type": "relative",
+    "unit": "SECONDS",
+    "value": 1200
+  },
+  "filter": ["and", ["key", "kube-state-metrics"],
+    ["=", "what", "kube_hpa_status_current_usage"],
+    ["=", "hpa", "alexa-proxy"]
+  ],
+  "aggregators": [],
+  "features": ["com.spotify.heroic.distributed_aggregations"],
+  "clientContext": {}
+}

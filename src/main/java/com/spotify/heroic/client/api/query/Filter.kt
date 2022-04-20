@@ -2,9 +2,31 @@ package com.spotify.heroic.client.api.query
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 
 
+@JsonDeserialize(using = FilterDeserializer::class)
 interface Filter
+
+class FilterDeserializer(vc: Class<*>? = null) : StdDeserializer<Filter>(vc) {
+
+    override fun deserialize(jp: JsonParser, ctxt: DeserializationContext): DeserializedFilter {
+        val mapper = ObjectMapper()
+            .registerModule(KotlinModule())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        val filterTags: List<Any> = mapper.readValue(jp)
+        return DeserializedFilter(filterTags)
+    }
+}
+
+data class DeserializedFilter(val filterTags: List<Any>) : Filter
 
 class TrueFilter: Filter {
     @JsonValue

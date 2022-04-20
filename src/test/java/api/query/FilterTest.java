@@ -26,11 +26,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
+import com.spotify.heroic.client.api.query.Filter;
+import com.spotify.heroic.client.api.query.DeserializedFilter;
 import com.spotify.heroic.client.api.query.Key;
 import com.spotify.heroic.client.api.query.KeyTagFilter;
+import com.spotify.heroic.client.api.query.MetricRequest;
 import com.spotify.heroic.client.api.query.Operator;
 import com.spotify.heroic.client.api.query.Tag;
 import com.spotify.heroic.client.api.query.TrueFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +45,6 @@ public class FilterTest {
   private ObjectMapper mapper =  new ObjectMapper()
       .registerModule(new KotlinModule())
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
 
   @Test
   public void testFilters() throws JsonProcessingException {
@@ -68,6 +73,15 @@ public class FilterTest {
                 List.of(
                     Tag.and(Operator.MATCH, "what", "heartbeat"),
                     Tag.not(Operator.MATCH, "env", "staging")))));
+
+    assertEquals(
+        "[\"and\",[\"key\",\"system\"],[\"=\",\"what\",\"heartbeat\"],[\"=\",\"env\",\"staging\"]]",
+        mapper.writeValueAsString(
+            KeyTagFilter.of(
+                Key.of("system"),
+                List.of(
+                    Tag.and(Operator.MATCH, "what", "heartbeat"),
+                    Tag.and(Operator.MATCH, "env", "staging")))));
   }
 
   @Test
@@ -97,5 +111,24 @@ public class FilterTest {
     assertEquals(
         "[\"q\",\"role in [heroicsuggestes\"]",
         mapper.writeValueAsString(Tag.and(Operator.CUSTOM, "role in [heroicsuggestes")));
+  }
+
+  @Test
+  public void testFilterDeserialization() throws IOException {
+    InputStream stream = getClass().getResourceAsStream("/filter.json");
+    Filter actualFilter = mapper.readValue(stream, Filter.class);
+    Filter expectedFilter = new DeserializedFilter(Arrays.asList("and", Arrays.asList("key", "kube-state-metrics"), Arrays.asList("=", "what", "kube_hpa_status_current_usage"), Arrays.asList("=", "hpa", "alexa-proxy")));
+
+    assertEquals(expectedFilter, actualFilter);
+  }
+
+  @Test
+  public void testMetricRequestDeserialization() throws IOException {
+    InputStream stream = getClass().getResourceAsStream("/metric-request.json");
+    MetricRequest metricRequest = mapper.readValue(stream, MetricRequest.class);
+    Filter expectedFilter = new DeserializedFilter(Arrays.asList("and", Arrays.asList("key", "kube-state-metrics"), Arrays.asList("=", "what", "kube_hpa_status_current_usage"), Arrays.asList("=", "hpa", "alexa-proxy")));
+    assertEquals(Arrays.asList(), metricRequest.getAggregators());
+    assertEquals(expectedFilter, metricRequest.getFilter());
+
   }
 }
