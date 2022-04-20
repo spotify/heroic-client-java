@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import com.spotify.heroic.client.api.query.Filter;
-import com.spotify.heroic.client.api.query.FilterFromPubsub;
+import com.spotify.heroic.client.api.query.DeserializedFilter;
 import com.spotify.heroic.client.api.query.Key;
 import com.spotify.heroic.client.api.query.KeyTagFilter;
 import com.spotify.heroic.client.api.query.MetricRequest;
@@ -115,18 +115,18 @@ public class FilterTest {
 
   @Test
   public void testFilterDeserialization() throws IOException {
-    InputStream stream = getClass().getResourceAsStream("/filter-from-pubsub.json");
+    InputStream stream = getClass().getResourceAsStream("/filter.json");
     Filter actualFilter = mapper.readValue(stream, Filter.class);
-    Filter expectedFilter = new FilterFromPubsub(Arrays.asList("and", Arrays.asList("key", "kube-state-metrics"), Arrays.asList("=", "what", "kube_hpa_status_current_usage"), Arrays.asList("=", "hpa", "alexa-proxy")));
+    Filter expectedFilter = new DeserializedFilter(Arrays.asList("and", Arrays.asList("key", "kube-state-metrics"), Arrays.asList("=", "what", "kube_hpa_status_current_usage"), Arrays.asList("=", "hpa", "alexa-proxy")));
 
     assertEquals(expectedFilter, actualFilter);
   }
 
   @Test
   public void testMetricRequestDeserialization() throws IOException {
-    InputStream stream = getClass().getResourceAsStream("/metric-request-from-pubsub.json");
+    InputStream stream = getClass().getResourceAsStream("/metric-request.json");
     MetricRequest metricRequest = mapper.readValue(stream, MetricRequest.class);
-    Filter expectedFilter = new FilterFromPubsub(Arrays.asList("and", Arrays.asList("key", "kube-state-metrics"), Arrays.asList("=", "what", "kube_hpa_status_current_usage"), Arrays.asList("=", "hpa", "alexa-proxy")));
+    Filter expectedFilter = new DeserializedFilter(Arrays.asList("and", Arrays.asList("key", "kube-state-metrics"), Arrays.asList("=", "what", "kube_hpa_status_current_usage"), Arrays.asList("=", "hpa", "alexa-proxy")));
     assertEquals(Arrays.asList(), metricRequest.getAggregators());
     assertEquals(expectedFilter, metricRequest.getFilter());
 

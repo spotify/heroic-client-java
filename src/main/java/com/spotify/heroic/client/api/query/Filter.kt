@@ -17,16 +17,16 @@ interface Filter
 
 class FilterDeserializer(vc: Class<*>? = null) : StdDeserializer<Filter>(vc) {
 
-    override fun deserialize(jp: JsonParser, ctxt: DeserializationContext): FilterFromPubsub {
+    override fun deserialize(jp: JsonParser, ctxt: DeserializationContext): DeserializedFilter {
         val mapper = ObjectMapper()
             .registerModule(KotlinModule())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         val filterTags: List<Any> = mapper.readValue(jp)
-        return FilterFromPubsub(filterTags)
+        return DeserializedFilter(filterTags)
     }
 }
 
-data class FilterFromPubsub(val filterTags: List<Any>) : Filter
+data class DeserializedFilter(val filterTags: List<Any>) : Filter
 
 class TrueFilter: Filter {
     @JsonValue
