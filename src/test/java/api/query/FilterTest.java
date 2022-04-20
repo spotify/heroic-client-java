@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,13 +27,16 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import com.spotify.heroic.client.api.query.Filter;
+import com.spotify.heroic.client.api.query.FilterFromPubsub;
 import com.spotify.heroic.client.api.query.Key;
 import com.spotify.heroic.client.api.query.KeyTagFilter;
+import com.spotify.heroic.client.api.query.MetricRequest;
 import com.spotify.heroic.client.api.query.Operator;
 import com.spotify.heroic.client.api.query.Tag;
 import com.spotify.heroic.client.api.query.TrueFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -112,10 +115,20 @@ public class FilterTest {
 
   @Test
   public void testFilterDeserialization() throws IOException {
-    InputStream stream = getClass().getResourceAsStream("/filter.json");
-    String actualFilter = mapper.readValue(stream, Filter.class).toString();
-//    String actualFilter = mapper.writeValueAsString(stream);
-    assertEquals("[\"and\",[\"key\",\"kube-state-metrics\"],[\"=\",\"what\",\"kube_hpa_status_current_usage\"],[\"=\",\"hpa\",\"alexa-proxy\"]]",
-        actualFilter);
+    InputStream stream = getClass().getResourceAsStream("/filter-from-pubsub.json");
+    Filter actualFilter = mapper.readValue(stream, Filter.class);
+    Filter expectedFilter = new FilterFromPubsub(Arrays.asList("and", Arrays.asList("key", "kube-state-metrics"), Arrays.asList("=", "what", "kube_hpa_status_current_usage"), Arrays.asList("=", "hpa", "alexa-proxy")));
+
+    assertEquals(expectedFilter, actualFilter);
+  }
+
+  @Test
+  public void testMetricRequestDeserialization() throws IOException {
+    InputStream stream = getClass().getResourceAsStream("/metric-request-from-pubsub.json");
+    MetricRequest metricRequest = mapper.readValue(stream, MetricRequest.class);
+    Filter expectedFilter = new FilterFromPubsub(Arrays.asList("and", Arrays.asList("key", "kube-state-metrics"), Arrays.asList("=", "what", "kube_hpa_status_current_usage"), Arrays.asList("=", "hpa", "alexa-proxy")));
+    assertEquals(Arrays.asList(), metricRequest.getAggregators());
+    assertEquals(expectedFilter, metricRequest.getFilter());
+
   }
 }
