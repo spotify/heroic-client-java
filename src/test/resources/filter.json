@@ -1,17 +1,1 @@
-[
-  "and",
-  [
-    "key",
-    "kube-state-metrics"
-  ],
-  [
-    "=",
-    "what",
-    "kube_hpa_status_current_usage"
-  ],
-  [
-    "=",
-    "hpa",
-    "alexa-proxy"
-  ]
-]
+["and",["key","kube-state-metrics"],["=","what","kube_hpa_status_current_usage"],["=","hpa","alexa-proxy"]]
