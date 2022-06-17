@@ -56,7 +56,8 @@ public class AggregationTest {
 
   @Test
   void tDigest() throws JsonProcessingException {
-    assertEquals("{\"type\":\"tdigest\",\"sampling\":{\"unit\":\"SECONDS\",\"value\":60}}",
+    assertEquals(
+        "{\"type\":\"tdigest\",\"sampling\":{\"unit\":\"SECONDS\",\"value\":60}}",
         mapper.writeValueAsString(new TDigest(new Sampling(TimeUnit.SECONDS, 60))));
   }
 }

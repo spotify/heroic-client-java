@@ -50,9 +50,10 @@ public class HeroicClient {
   private final OkHttpClient client;
   private final Request baseRequest;
 
-  private static final ObjectMapper mapper = new ObjectMapper()
-      .registerModule(new KotlinModule())
-      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  private static final ObjectMapper mapper =
+      new ObjectMapper()
+          .registerModule(new KotlinModule())
+          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
   private HeroicClient(String heroicUrl, Config config) {
     this.baseUrl = HttpUrl.parse(heroicUrl);
@@ -60,16 +61,19 @@ public class HeroicClient {
       throw new HeroicClientException("A valid heroic url is required");
     }
 
-    this.client = new OkHttpClient().newBuilder()
-        .connectTimeout(config.getConnectTimeoutSeconds(), TimeUnit.SECONDS)
-        .readTimeout(config.getReadTimeoutSeconds(), TimeUnit.SECONDS)
-        .build();
+    this.client =
+        new OkHttpClient()
+            .newBuilder()
+            .connectTimeout(config.getConnectTimeoutSeconds(), TimeUnit.SECONDS)
+            .readTimeout(config.getReadTimeoutSeconds(), TimeUnit.SECONDS)
+            .build();
 
-    this.baseRequest = new Request.Builder()
-        .url(baseUrl)
-        .addHeader("Content-Type", "application/json")
-        .addHeader("X-Client-Id", config.getClientId())
-        .build();
+    this.baseRequest =
+        new Request.Builder()
+            .url(baseUrl)
+            .addHeader("Content-Type", "application/json")
+            .addHeader("X-Client-Id", config.getClientId())
+            .build();
   }
 
   public static HeroicClient create(String heroicUrl) {
@@ -82,11 +86,13 @@ public class HeroicClient {
 
   private <T> Request postRequest(String pathSegments, T request) {
     try {
-      return baseRequest.newBuilder()
+      return baseRequest
+          .newBuilder()
           .url(baseUrl.newBuilder().addPathSegments(pathSegments).build())
-          .post(RequestBody.create(
-              MediaType.parse("application/json; charset=utf-8"),
-              mapper.writeValueAsString(request)))
+          .post(
+              RequestBody.create(
+                  MediaType.parse("application/json; charset=utf-8"),
+                  mapper.writeValueAsString(request)))
           .build();
     } catch (JsonProcessingException e) {
       throw new HeroicClientException(e);
@@ -109,8 +115,7 @@ public class HeroicClient {
     return bind(request).thenApply(r -> marshallResponse(r, new TypeReference<>() {}));
   }
 
-  public BatchResponse queryBatchBlocking(BatchRequest batchResponse)
-      throws HeroicServerException {
+  public BatchResponse queryBatchBlocking(BatchRequest batchResponse) throws HeroicServerException {
     final Request request = postRequest("query/batch", batchResponse);
     return marshallResponse(blockingRequest(request), new TypeReference<>() {});
   }
@@ -133,8 +138,8 @@ public class HeroicClient {
 
     if (!response.isSuccessful()) {
       try {
-      throw new HeroicServerException(
-          "status code: " + response.code() + " error: " + response.body().string());
+        throw new HeroicServerException(
+            "status code: " + response.code() + " error: " + response.body().string());
       } catch (IOException e) {
         throw new HeroicServerException(e);
       }

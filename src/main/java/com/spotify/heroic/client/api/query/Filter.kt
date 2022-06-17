@@ -11,22 +11,25 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 
-
 @JsonDeserialize(using = FilterDeserializer::class)
 interface Filter
 
 class FilterDeserializer(vc: Class<*>? = null) : StdDeserializer<Filter>(vc) {
+    @JsonValue
+    private var filterTags = mutableListOf<Any>()
 
-    override fun deserialize(jp: JsonParser, ctxt: DeserializationContext): DeserializedFilter {
+    override fun deserialize(jp: JsonParser, ctxt: DeserializationContext): Filter {
         val mapper = ObjectMapper()
             .registerModule(KotlinModule())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        val filterTags: List<Any> = mapper.readValue(jp)
-        return DeserializedFilter(filterTags)
+            .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        filterTags = mapper.readValue(jp);
+        if(filterTags[0] == "and"){
+            filterTags.removeAt(0)
+        }
+        return KeyTagFilter(key = null, tags = filterTags)
     }
 }
-
-data class DeserializedFilter(val filterTags: List<Any>) : Filter
 
 class TrueFilter: Filter {
     @JsonValue
