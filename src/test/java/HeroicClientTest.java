@@ -49,26 +49,33 @@ import org.junit.jupiter.api.Test;
 
 public class HeroicClientTest {
 
-  @Rule
-  public MockWebServer server = new MockWebServer();
+  @Rule public MockWebServer server = new MockWebServer();
 
   private final Key METRIC_KEY = Key.of("system");
   private final Tag WHAT_TAG = Tag.and(Operator.MATCH, "what", "heartbeat");
 
-  private final MetricRequest METRIC_REQUEST = new MetricRequest.Builder()
-      .withRange(Relative.withTime(TimeUnit.HOURS, 1L))
-      .withFilter(KeyTagFilter.of(METRIC_KEY, List.of(WHAT_TAG)))
-      .withAggregation(
-          GroupingAggregation.forEach(new Maximum(Sampling.withTime(TimeUnit.SECONDS, 120))))
-      .withAggregation(GroupingAggregation
-          .groupBy(List.of("site"), new Sum(Sampling.withTime(TimeUnit.SECONDS, 120))))
-      .build();
-
+  private final MetricRequest METRIC_REQUEST =
+      new MetricRequest.Builder()
+          .withRange(Relative.withTime(TimeUnit.HOURS, 1L))
+          .withFilter(KeyTagFilter.of(METRIC_KEY, List.of(WHAT_TAG)))
+          .withAggregation(
+              GroupingAggregation.forEach(new Maximum(Sampling.withTime(TimeUnit.SECONDS, 120))))
+          .withAggregation(
+              GroupingAggregation.groupBy(
+                  List.of("site"), new Sum(Sampling.withTime(TimeUnit.SECONDS, 120))))
+          .build();
 
   @Test
-  void queryMetricsResponseBlocking() throws IOException, InterruptedException, HeroicServerException {
-    server.enqueue(new MockResponse().setResponseCode(200).setBody(new String(
-        getClass().getResourceAsStream("/heroic-metrics-response.json").readAllBytes())));
+  void queryMetricsResponseBlocking()
+      throws IOException, InterruptedException, HeroicServerException {
+    server.enqueue(
+        new MockResponse()
+            .setResponseCode(200)
+            .setBody(
+                new String(
+                    getClass()
+                        .getResourceAsStream("/heroic-metrics-response.json")
+                        .readAllBytes())));
 
     final HeroicClient heroicClient = HeroicClient.create(server.url("").toString());
     final MetricResponse metricResponse = heroicClient.queryMetricsBlocking(METRIC_REQUEST);
@@ -82,9 +89,14 @@ public class HeroicClientTest {
   }
 
   @Test
-  void queryBatchResponseBlocking() throws IOException, InterruptedException, HeroicServerException {
-    server.enqueue(new MockResponse().setResponseCode(200).setBody(new String(
-        getClass().getResourceAsStream("/heroic-batch-response.json").readAllBytes())));
+  void queryBatchResponseBlocking()
+      throws IOException, InterruptedException, HeroicServerException {
+    server.enqueue(
+        new MockResponse()
+            .setResponseCode(200)
+            .setBody(
+                new String(
+                    getClass().getResourceAsStream("/heroic-batch-response.json").readAllBytes())));
 
     final HeroicClient heroicClient = HeroicClient.create(server.url("").toString());
 
@@ -95,8 +107,9 @@ public class HeroicClientTest {
 
     assertEquals(3, batchResponse.getResults().get("A").getCommonTags().size());
     assertEquals(3, batchResponse.getResults().get("A").getDataPoints().size());
-    assertEquals(123.0, batchResponse.getResults().get("A").getDataPoints()
-        .get(0).getValues().get(0).getValue());
+    assertEquals(
+        123.0,
+        batchResponse.getResults().get("A").getDataPoints().get(0).getValues().get(0).getValue());
 
     RecordedRequest serverRequest = server.takeRequest();
     assertEquals("/query/batch", serverRequest.getPath());
@@ -119,5 +132,4 @@ public class HeroicClientTest {
     Thread.sleep(2000L);
     assertTrue(response.isCompletedExceptionally());
   }
-
 }

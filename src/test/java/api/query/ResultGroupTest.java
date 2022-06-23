@@ -34,11 +34,11 @@ public class ResultGroupTest {
 
   @Test
   public void nullKey() throws JsonProcessingException {
-    String json = "{\"type\": \"points\",\"hash\": \"2362f9de\", \"shard\": {},"
-                  + "\"cadence\": 0,\"values\": [],\"key\": null,\"tags\": {},"
-                  + "\"tagCounts\": {},\"resource\": {},\"resourceCounts\": {}}";
+    String json =
+        "{\"type\": \"points\",\"hash\": \"2362f9de\", \"shard\": {},"
+            + "\"cadence\": 0,\"values\": [],\"key\": null,\"tags\": {},"
+            + "\"tagCounts\": {},\"resource\": {},\"resourceCounts\": {}}";
     final ResultGroup.Points points = mapper.readValue(json, ResultGroup.Points.class);
     assertNull(points.getKey());
   }
-
 }

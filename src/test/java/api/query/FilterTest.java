@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import com.spotify.heroic.client.api.query.Filter;
-import com.spotify.heroic.client.api.query.DeserializedFilter;
 import com.spotify.heroic.client.api.query.Key;
 import com.spotify.heroic.client.api.query.KeyTagFilter;
 import com.spotify.heroic.client.api.query.MetricRequest;
@@ -42,9 +41,10 @@ import org.junit.jupiter.api.Test;
 
 public class FilterTest {
 
-  private ObjectMapper mapper =  new ObjectMapper()
-      .registerModule(new KotlinModule())
-      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  private ObjectMapper mapper =
+      new ObjectMapper()
+          .registerModule(new KotlinModule())
+          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
   @Test
   public void testFilters() throws JsonProcessingException {
@@ -90,9 +90,7 @@ public class FilterTest {
         "[\"=\",\"what\",\"heartbeat\"]",
         mapper.writeValueAsString(Tag.and(Operator.MATCH, "what", "heartbeat")));
 
-    assertEquals(
-        "[\"+\",\"what\"]",
-        mapper.writeValueAsString(Tag.and(Operator.EXIST, "what")));
+    assertEquals("[\"+\",\"what\"]", mapper.writeValueAsString(Tag.and(Operator.EXIST, "what")));
 
     assertEquals(
         "[\"^\",\"what\",\"heart\"]",
@@ -117,18 +115,47 @@ public class FilterTest {
   public void testFilterDeserialization() throws IOException {
     InputStream stream = getClass().getResourceAsStream("/filter.json");
     Filter actualFilter = mapper.readValue(stream, Filter.class);
-    Filter expectedFilter = new DeserializedFilter(Arrays.asList("and", Arrays.asList("key", "kube-state-metrics"), Arrays.asList("=", "what", "kube_hpa_status_current_usage"), Arrays.asList("=", "hpa", "alexa-proxy")));
+    Filter expectedFilter =
+        KeyTagFilter.of(
+            Key.of("kube-state-metrics"),
+            List.of(
+                Tag.and(Operator.MATCH, "what", "kube_hpa_status_current_usage"),
+                Tag.and(Operator.MATCH, "hpa", "alexa-proxy")));
 
-    assertEquals(expectedFilter, actualFilter);
+    assertEquals(
+        mapper.writeValueAsString(expectedFilter), mapper.writeValueAsString((actualFilter)));
   }
 
   @Test
   public void testMetricRequestDeserialization() throws IOException {
     InputStream stream = getClass().getResourceAsStream("/metric-request.json");
     MetricRequest metricRequest = mapper.readValue(stream, MetricRequest.class);
-    Filter expectedFilter = new DeserializedFilter(Arrays.asList("and", Arrays.asList("key", "kube-state-metrics"), Arrays.asList("=", "what", "kube_hpa_status_current_usage"), Arrays.asList("=", "hpa", "alexa-proxy")));
-    assertEquals(Arrays.asList(), metricRequest.getAggregators());
-    assertEquals(expectedFilter, metricRequest.getFilter());
+    Filter expectedFilter =
+        KeyTagFilter.of(
+            Key.of("kube-state-metrics"),
+            List.of(
+                Tag.and(Operator.MATCH, "what", "kube_hpa_status_current_usage"),
+                Tag.and(Operator.MATCH, "hpa", "alexa-proxy")));
 
+    assertEquals(Arrays.asList(), metricRequest.getAggregators());
+    assertEquals(
+        mapper.writeValueAsString(expectedFilter),
+        mapper.writeValueAsString(metricRequest.getFilter()));
+  }
+
+  @Test
+  public void testDeserializeSerialize() throws JsonProcessingException {
+    String filterString =
+        "[\"and\",[\"key\",\"system\"],[\"=\",\"what\",\"heartbeat\"],[\"not\",[\"=\",\"env\",\"staging\"]]]";
+    Filter deserializedFilter = mapper.readValue(filterString, Filter.class);
+    String serializedFilter = mapper.writeValueAsString(deserializedFilter);
+    assertEquals(
+        serializedFilter,
+        mapper.writeValueAsString(
+            KeyTagFilter.of(
+                Key.of("system"),
+                List.of(
+                    Tag.and(Operator.MATCH, "what", "heartbeat"),
+                    Tag.not(Operator.MATCH, "env", "staging")))));
   }
 }
