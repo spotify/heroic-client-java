@@ -10,13 +10,13 @@
 
     <groupId>com.spotify.heroic</groupId>
     <artifactId>heroic-client</artifactId>
-    <version>0.0.8</version>
+    <version>0.0.9-SNAPSHOT</version>
 
     <scm>
         <url>https://github.com/spotify/heroic-client-java</url>
         <connection>scm:git:git@github.com:spotify/heroic-client-java.git</connection>
         <developerConnection>scm:git:git@github.com:spotify/heroic-client-java.git</developerConnection>
-        <tag>v0.0.8</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <licenses>
