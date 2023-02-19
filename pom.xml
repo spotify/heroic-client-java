@@ -31,7 +31,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <okhttp.version>3.14.6</okhttp.version>
         <jackson.version>2.10.1</jackson.version>
-        <kotlin.version>1.3.61</kotlin.version>
+        <kotlin.version>1.8.0</kotlin.version>
     </properties>
 
     <dependencyManagement>
